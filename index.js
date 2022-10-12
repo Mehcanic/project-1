@@ -10,35 +10,27 @@ ctx.fillStyle = "gray";
 ctx.fillRect(0, 0, width, height);
 
 class Sprite {
-  constructor({ position, height, width, color, speed, health }) {
+  constructor({ position, height, width, color, speed, health, radius }) {
     this.position = position;
     this.height = height;
     this.width = width;
     this.color = color;
     this.speed = speed;
     this.health = health;
+    this.radius = radius
   }
 
-  draw() {
+  drawSquare() {
     ctx.fillStyle = this.color;
     ctx.fillRect(this.position.x, this.position.y, this.height, this.width);
   }
-}
 
-class Projectile {
-  constructor({ x, y, color, radius, bulletSpeed }) {
-    this.x = x;
-    this.y = y;
-    this.color = color;
-    this.radius = radius;
-    this.bulletSpeed = bulletSpeed;
-  }
-
-  draw() {
+  drawCircle() {
     ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.Pi * 2);
     ctx.fillStyle = this.color;
+    ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
+    // console.log('i')
   }
 }
 
@@ -53,27 +45,31 @@ const player1 = new Sprite({
   speed: 1,
   health: 100,
 });
-
 const player2 = new Sprite({
-  x: 900,
-  y: 0,
+  position: {
+    x: 900,
+    y: 100,
+  },
   height: 50,
   width: 100,
   color: "red",
   speed: 1,
   health: 100,
 });
-
-// const bullet2 = new Projectile({
+// const bullet1 = new Sprite({
 //   position: {
-//     x: player1.position.x,
-//     y: player1.position.y,
+//     x: player1.position.x + player1.width,
+//     y: player1.position.y + player1.width,
 //   },
-//   color: "black",
-//   radius: 5,
-//   bulletSpeed: 1,
-// });
+//   height: 10,
+//   width: 10,
+//   color: 'black',
+//   speed: 0.1,
+//   radius: 10,
+// })
 
+const bulletsPlayer1 = [];
+const bulletsPlayer2 = [];
 const keys = {
   w: { pressed: false },
   a: { pressed: false },
@@ -107,9 +103,6 @@ window.addEventListener("keydown", (e) => {
     case "t":
       keys.t.pressed = true;
       break;
-    case "y":
-      keys.t.pressed = true;
-      break;
 
     // Player 2 movement
     case "ArrowUp":
@@ -126,9 +119,6 @@ window.addEventListener("keydown", (e) => {
       break;
     case "o":
       keys.o.pressed = true;
-      break;
-    case "p":
-      keys.p.pressed = true;
       break;
   }
 });
@@ -147,13 +137,9 @@ window.addEventListener("keyup", (e) => {
     case "d":
       keys.d.pressed = false;
       break;
-    // case "t":
-    //   keys.t.pressed = false;
-    //   break;
-    // case "y":
-    //   keys.t.pressed = false;
-    //   break;
-
+    case "t":
+      keys.t.pressed = false;
+      break; 
     // Player 2 movement
     case "ArrowUp":
       keys.ArrowUp.pressed = false;
@@ -167,12 +153,9 @@ window.addEventListener("keyup", (e) => {
     case "ArrowRight":
       keys.ArrowRight.pressed = false;
       break;
-    // case "o":
-    //   keys.o.pressed = false;
-    //   break;
-    // case "p":
-    //   keys.p.pressed = false;
-    //   break;
+    case "o":
+      keys.o.pressed = false;
+      break;
   }
 });
 
@@ -191,15 +174,7 @@ const player1Actions = () => {
   if (keys.d.pressed) {
     player1.position.x += player1.speed;
   }
-  if (keys.t.pressed) {
-    fire();
-    console.log("t");
-  }
-  if (keys.y.pressed) {
-    punch();
-  }
 };
-
 const player2Actions = () => {
   // Player 2 movement
   if (keys.ArrowUp.pressed) {
@@ -214,36 +189,72 @@ const player2Actions = () => {
   if (keys.ArrowRight.pressed) {
     player2.position.x += player2.speed;
   }
-  if (keys.o.pressed) {
-    fire();
-  }
-  if (keys.p.pressed) {
-    punch();
-  }
 };
 
-const fire = () => {
-  window.addEventListener("click", (event) => {
-    const bullet1 = new Projectile({
-      x: event.clientX,
-      y: event.clientY,
-      color: "black",
-      radius: 5,
-      bulletSpeed: 1,
-    });
+// TODO: Make that only 5 bullets can be created at one time and then they will be deleted
 
-    bullet1.draw();
-  });
-};
+const firePlayer1 = () => {
+  window.addEventListener("keydown", (e) => {
+    if (keys.t.pressed) {
+      bulletsPlayer1.push(
+        new Sprite({
+          position: {
+            x: player1.position.x + player1.width / 2,
+            y: player1.position.y + player1.width / 2,
+          },
+          height: 10,
+          width: 10,
+          color: "black",
+          speed: 10,
+          radius: 10,
+        })
+      )
+    }
+  })
+  bulletsPlayer1.forEach((bullet) => {
+    bullet.drawCircle();
+    bullet.position.x += bullet.speed;
+    console.log(bulletsPlayer1)
+  })
+}
+const firePlayer2 = () => {
+  window.addEventListener("keydown", (e) => {
+    if (keys.o.pressed) {
+      bulletsPlayer2.push(
+        new Sprite({
+          position: {
+            x: player2.position.x,
+            y: player2.position.y + player2.width / 2,
+          },
+          height: 10,
+          width: 10,
+          color: "black",
+          speed: 10,
+          radius: 10,
+        })
+      )
+    }
+  })
+  bulletsPlayer2.forEach((bullet) => {
+    bullet.drawCircle();
+    bullet.position.x -= bullet.speed;
+  })
+}
 
+const animateShoot = () => {
+  requestAnimationFrame(animateShoot);
+
+  firePlayer1();
+  firePlayer2();
+}
 const animate = () => {
   window.requestAnimationFrame(animate);
   ctx.fillStyle = "gray";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  player1.draw();
-  player2.draw();
+  player1.drawSquare();
+  player2.drawSquare();
   player1Actions();
   player2Actions();
 };
-
 animate();
+animateShoot();
