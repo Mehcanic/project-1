@@ -30,7 +30,33 @@ class Sprite {
     ctx.fillStyle = this.color;
     ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
-    // console.log('i')
+  }
+}
+
+// COMPLETE Refactor code to create class for projectiles.
+// TODO Create projectiles in a way that you can shoot them in 0.5 sec intervals
+// TODO Create a way to detect collision between bullets and players
+// TODO Create a way to detect collision between bullets and walls
+// TODO Create a way to detect collision between players and walls
+// TODO Create a way to detect collision between players and players
+
+
+
+class Projectile extends Sprite {
+  super ({ position, height, width, color, speed, radius }) {
+    this.position = position;
+    this.height = height;
+    this.width = width;
+    this.color = color;
+    this.speed = speed;
+    this.radius = radius
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.fillStyle = this.color;
+    ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
+    ctx.fill();
   }
 }
 
@@ -39,8 +65,8 @@ const player1 = new Sprite({
     x: 100,
     y: 100,
   },
-  height: 50,
-  width: 100,
+  height: 25,
+  width: 25,
   color: "blue",
   speed: 1,
   health: 100,
@@ -50,23 +76,12 @@ const player2 = new Sprite({
     x: 900,
     y: 100,
   },
-  height: 50,
-  width: 100,
+  height: 25,
+  width: 25,
   color: "red",
   speed: 1,
   health: 100,
 });
-// const bullet1 = new Sprite({
-//   position: {
-//     x: player1.position.x + player1.width,
-//     y: player1.position.y + player1.width,
-//   },
-//   height: 10,
-//   width: 10,
-//   color: 'black',
-//   speed: 0.1,
-//   radius: 10,
-// })
 
 const bulletsPlayer1 = [];
 const bulletsPlayer2 = [];
@@ -81,9 +96,10 @@ const keys = {
   ArrowDown: { pressed: false },
   ArrowLeft: { pressed: false },
   ArrowRight: { pressed: false },
-  o: { pressed: false },
-  p: { pressed: false },
+  "1": { pressed: false },
+  "2": { pressed: false },
 };
+
 // ! Players movement event listeners
 window.addEventListener("keydown", (e) => {
   switch (e.key) {
@@ -117,10 +133,13 @@ window.addEventListener("keydown", (e) => {
     case "ArrowRight":
       keys.ArrowRight.pressed = true;
       break;
-    case "o":
-      keys.o.pressed = true;
+    case "1":
+      keys["1"].pressed = true;
       break;
   }
+
+
+
 });
 window.addEventListener("keyup", (e) => {
   switch (e.key) {
@@ -153,8 +172,8 @@ window.addEventListener("keyup", (e) => {
     case "ArrowRight":
       keys.ArrowRight.pressed = false;
       break;
-    case "o":
-      keys.o.pressed = false;
+    case "1":
+      keys["1"].pressed = false;
       break;
   }
 });
@@ -174,6 +193,21 @@ const player1Actions = () => {
   if (keys.d.pressed) {
     player1.position.x += player1.speed;
   }
+  if (keys.t.pressed && bulletsPlayer1.length < 1) {
+    bulletsPlayer1.push(
+      new Projectile({
+        position: {
+          x: player1.position.x + player1.width / 2,
+          y: player1.position.y + player1.width / 2,
+        },
+        height: 10,
+        width: 10,
+        color: "black",
+        speed: 25,
+        radius: 2.5,
+      })
+    )
+  }
 };
 const player2Actions = () => {
   // Player 2 movement
@@ -189,64 +223,25 @@ const player2Actions = () => {
   if (keys.ArrowRight.pressed) {
     player2.position.x += player2.speed;
   }
+  if (keys["1"].pressed && bulletsPlayer2.length < 1) {
+    bulletsPlayer2.push(
+      new Projectile({
+        position: {
+          x: player2.position.x,
+          y: player2.position.y + player2.width / 2,
+        },
+        height: 10,
+        width: 10,
+        color: "black",
+        speed: 25,
+        radius: 2.5,
+      })
+    )
+  }
 };
 
-// TODO: Make that only 5 bullets can be created at one time and then they will be deleted
+// COMPLETED: Make that only 1 bullets can be created at one time and then they will be deleted
 
-const firePlayer1 = () => {
-  window.addEventListener("keydown", (e) => {
-    if (keys.t.pressed) {
-      bulletsPlayer1.push(
-        new Sprite({
-          position: {
-            x: player1.position.x + player1.width / 2,
-            y: player1.position.y + player1.width / 2,
-          },
-          height: 10,
-          width: 10,
-          color: "black",
-          speed: 10,
-          radius: 10,
-        })
-      )
-    }
-  })
-  bulletsPlayer1.forEach((bullet) => {
-    bullet.drawCircle();
-    bullet.position.x += bullet.speed;
-    console.log(bulletsPlayer1)
-  })
-}
-const firePlayer2 = () => {
-  window.addEventListener("keydown", (e) => {
-    if (keys.o.pressed) {
-      bulletsPlayer2.push(
-        new Sprite({
-          position: {
-            x: player2.position.x,
-            y: player2.position.y + player2.width / 2,
-          },
-          height: 10,
-          width: 10,
-          color: "black",
-          speed: 10,
-          radius: 10,
-        })
-      )
-    }
-  })
-  bulletsPlayer2.forEach((bullet) => {
-    bullet.drawCircle();
-    bullet.position.x -= bullet.speed;
-  })
-}
-
-const animateShoot = () => {
-  requestAnimationFrame(animateShoot);
-
-  firePlayer1();
-  firePlayer2();
-}
 const animate = () => {
   window.requestAnimationFrame(animate);
   ctx.fillStyle = "gray";
@@ -255,6 +250,25 @@ const animate = () => {
   player2.drawSquare();
   player1Actions();
   player2Actions();
+
+  bulletsPlayer1.forEach((bullet, index) => {
+    if (bullet.position.x - bullet.radius > canvas.width) {
+      bulletsPlayer1.splice(index, 1);
+    } else {
+      bullet.draw()
+      bullet.position.x += bullet.speed
+    }
+  })
+
+  bulletsPlayer2.forEach((bullet, index) => {
+    if (bullet.position.x <= 0) {
+      bulletsPlayer2.splice(index, 1);
+    } else {
+      bullet.draw()
+      bullet.position.x -= bullet.speed
+    }
+  })
+
 };
 animate();
-animateShoot();
+
