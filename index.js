@@ -17,7 +17,7 @@ class Sprite {
     this.color = color;
     this.speed = speed;
     this.health = health;
-    this.radius = radius
+    this.radius = radius;
   }
 
   drawSquare() {
@@ -31,25 +31,37 @@ class Sprite {
     ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
   }
+
+  shoot() {
+    if (this.health <= 0) {
+      this.color = "black";
+    } else if (
+      this.position.x > this.position.x &&
+      this.position.x < this.position.x + this.width &&
+      this.position.y > this.position.y &&
+      this.position.y < this.position.y + this.height
+    ) {
+      this.health -= 10;
+      console.log(this.health);
+    }
+  }
 }
 
 // COMPLETE Refactor code to create class for projectiles.
 // TODO Create projectiles in a way that you can shoot them in 0.5 sec intervals
-// TODO Create a way to detect collision between bullets and players
+// COMPLETE Create a way to detect collision between bullets and players
 // TODO Create a way to detect collision between bullets and walls
 // TODO Create a way to detect collision between players and walls
 // TODO Create a way to detect collision between players and players
 
-
-
 class Projectile extends Sprite {
-  super ({ position, height, width, color, speed, radius }) {
+  super({ position, height, width, color, speed, radius }) {
     this.position = position;
     this.height = height;
     this.width = width;
     this.color = color;
     this.speed = speed;
-    this.radius = radius
+    this.radius = radius;
   }
 
   draw() {
@@ -96,8 +108,8 @@ const keys = {
   ArrowDown: { pressed: false },
   ArrowLeft: { pressed: false },
   ArrowRight: { pressed: false },
-  "1": { pressed: false },
-  "2": { pressed: false },
+  1: { pressed: false },
+  2: { pressed: false },
 };
 
 // ! Players movement event listeners
@@ -137,9 +149,6 @@ window.addEventListener("keydown", (e) => {
       keys["1"].pressed = true;
       break;
   }
-
-
-
 });
 window.addEventListener("keyup", (e) => {
   switch (e.key) {
@@ -158,7 +167,7 @@ window.addEventListener("keyup", (e) => {
       break;
     case "t":
       keys.t.pressed = false;
-      break; 
+      break;
     // Player 2 movement
     case "ArrowUp":
       keys.ArrowUp.pressed = false;
@@ -206,7 +215,7 @@ const player1Actions = () => {
         speed: 25,
         radius: 2.5,
       })
-    )
+    );
   }
 };
 const player2Actions = () => {
@@ -236,11 +245,45 @@ const player2Actions = () => {
         speed: 25,
         radius: 2.5,
       })
-    )
+    );
   }
 };
 
 // COMPLETED: Make that only 1 bullets can be created at one time and then they will be deleted
+
+// ! Bullet player collision
+const bulletPlayer1Collision = () => {
+  bulletsPlayer1.forEach((bullet) => {
+    if (player2.health <= 0) {
+      player2.color = "black";
+    } else if (
+      bullet.position.x > player2.position.x &&
+      bullet.position.x < player2.position.x + player2.width &&
+      bullet.position.y > player2.position.y &&
+      bullet.position.y < player2.position.y + player2.height
+    ) {
+      player2.health -= 10;
+      bulletsPlayer1.splice(bulletsPlayer1.indexOf(bullet), 1);
+      console.log(player2.health);
+    }
+  });
+};
+
+const bulletPlayer2Collision = () => {
+  bulletsPlayer2.forEach((bullet) => {
+    if (player1.health <= 0) {
+      player1.color = "black";
+    } else if (
+      bullet.position.x < player1.position.x + player1.width &&
+      bullet.position.y > player1.position.y &&
+      bullet.position.y < player1.position.y + player1.height
+    ) {
+      player1.health -= 10;
+      bulletsPlayer2.splice(bulletsPlayer2.indexOf(bullet), 1);
+      console.log(player1.health);
+    }
+  });
+};
 
 const animate = () => {
   window.requestAnimationFrame(animate);
@@ -251,24 +294,24 @@ const animate = () => {
   player1Actions();
   player2Actions();
 
-  bulletsPlayer1.forEach((bullet, index) => {
+  bulletsPlayer1.forEach((bullet) => {
     if (bullet.position.x - bullet.radius > canvas.width) {
-      bulletsPlayer1.splice(index, 1);
+      bulletsPlayer1.splice(bulletsPlayer1.indexOf(bullet), 1);
     } else {
-      bullet.draw()
-      bullet.position.x += bullet.speed
+      bullet.draw();
+      bullet.position.x += bullet.speed;
     }
-  })
+    bulletPlayer1Collision();
+  });
 
-  bulletsPlayer2.forEach((bullet, index) => {
+  bulletsPlayer2.forEach((bullet) => {
     if (bullet.position.x <= 0) {
-      bulletsPlayer2.splice(index, 1);
+      bulletsPlayer2.splice(bulletsPlayer2.indexOf(bullet), 1);
     } else {
-      bullet.draw()
-      bullet.position.x -= bullet.speed
+      bullet.draw();
+      bullet.position.x -= bullet.speed;
     }
-  })
-
+    bulletPlayer2Collision();
+  });
 };
 animate();
-
