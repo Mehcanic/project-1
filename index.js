@@ -32,6 +32,7 @@ class Sprite {
     ctx.fill();
   }
 
+  // TODO make this method work for both player so it can be turned off whenever applicable
   shoot() {
     if (this.health <= 0) {
       this.color = "black";
