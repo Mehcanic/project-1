@@ -2,6 +2,11 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const width = canvas.width;
 const height = canvas.height;
+const player1health = document.getElementById("player1health");
+const player2health = document.getElementById("player2health");
+const player1gun = document.getElementById("player1gun");
+const player2gun = document.getElementById("player2gun");
+
 
 // COMPLETED Create classes for player, bullet and obstacle
 
@@ -94,7 +99,8 @@ window.addEventListener("keyup", (e) => {
 
 // ! Player class
 class Player {
-  constructor({ position, width, height, area, color, speed, health, enemyHealth, keyUp, keyDown, keyLeft, keyRight, keyShoot, bullets, isCollision, playersCollision, imageSrc, sprites, targetWidth, targetHeight, scale, framesMax, offset }) {
+  constructor({ name, position, width, height, area, color, speed, health, displayedHealth, enemyHealth, keyUp, keyDown, keyLeft, keyRight, keyShoot, bullets, isCollision, playersCollision, imageSrc, sprites, targetWidth, targetHeight, scale, framesMax, offset }) {
+    this.name = name;
     this.position = position;
     this.width = width;
     this.height = height;
@@ -103,6 +109,7 @@ class Player {
     this.speed = speed;
 
     this.health = health;
+    this.displayedHealth = displayedHealth;
     this.enemyHealth = enemyHealth;
 
     this.keyUp = keyUp;
@@ -196,7 +203,7 @@ class Player {
             y: this.position.y + this.height / 2,
           },
           color: this.color,
-          speed: 30,
+          speed: 100,
           radius: 3,
         })
       );
@@ -211,9 +218,20 @@ class Player {
         return;
       } else if (this.isCollision(bullet)) {
         this.health -= 10;
+        // this.displayedHealth -= 10;
         console.log(this.health)
       }
     });
+  }
+
+  reduceDisplayedHealth = () => {
+    if (this.displayHealth !== this.health) {
+      this.health = parseInt(this.health)
+      // this.displayedHealth = this.health
+      this.displayedHealth.innerText = `${this.name}: ${this.health}`;
+    }
+
+    
   }
 
   wallCollision = () => {
@@ -280,17 +298,19 @@ class Obstacle extends Player {
 }
 
 const player1 = new Player({
+  name: "Player 1",
   position: { x: 100, y: 500 },
   height: 50,
   width: 50,
   area: height * width,
   color: "yellow",
-  imageSrc: "./images/R_witch_idle.png",
+  imageSrc: "./images/Yellow/Gunner_Yellow_Idle.png",
   scale: 3,
   framesMax: 6,
   offset: { x: 90, y: 40 },
   speed: 2,
   health: 100,
+  displayedHealth: player1health,
   keyUp: { pressed: false },
   keyDown: { pressed: false },
   keyLeft: { pressed: false },
@@ -323,17 +343,19 @@ const player1 = new Player({
   },
 });
 const player2 = new Player({
+  name: "Player 2",
   position: { x: 900, y: 500 },
   height: 50,
   width: 50,
   area: height * width,
   color: "red",
-  imageSrc: "./images/Blue-witch-idle.png",
+  imageSrc: "./images/Red/Gunner_Red_Idle.png",
   scale: 3,
   framesMax: 6,
   offset: { x: 0, y: 40 },
   speed: 2,
   health: 100,
+  displayedHealth: player2health,
   keyUp: { pressed: false },
   keyDown: { pressed: false },
   keyLeft: { pressed: false },
@@ -474,6 +496,9 @@ const animate = () => {
   player2.playerActions(player2);
   player1.wallCollision();
   player2.wallCollision();
+  player1.reduceDisplayedHealth(player1);
+  player2.reduceDisplayedHealth(player2);
+
   // obstacle1.drawObstacle();
   // obstacle2.drawObstacle();
   // obstacle3.drawObstacle();
