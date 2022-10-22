@@ -19,12 +19,12 @@ body {
   height: 100vh;
 }
 
-body div {
+#container {
   width: 100%;
   margin-inline: auto;
 }
 
-body div ul {
+#ulist {
   list-style: none;
   display: flex;
   flex-direction: row;
