@@ -7,7 +7,6 @@ const player2health = document.getElementById("player2health");
 const player1gun = document.getElementById("player1gun");
 const player2gun = document.getElementById("player2gun");
 
-
 // COMPLETED Create classes for player, bullet and obstacle
 
 // COMPLETED Create function to detect collision between players and projectiles
@@ -99,7 +98,33 @@ window.addEventListener("keyup", (e) => {
 
 // ! Player class
 class Player {
-  constructor({ name, position, width, height, area, color, speed, health, displayedHealth, enemyHealth, keyUp, keyDown, keyLeft, keyRight, keyShoot, bullets, isCollision, playersCollision, imageSrc, sprites, targetWidth, targetHeight, scale, framesMax, offset }) {
+  constructor({
+    name,
+    position,
+    width,
+    height,
+    area,
+    color,
+    speed,
+    health,
+    displayedHealth,
+    enemyHealth,
+    keyUp,
+    keyDown,
+    keyLeft,
+    keyRight,
+    keyShoot,
+    bullets,
+    isCollision,
+    playersCollision,
+    imageSrc,
+    sprites,
+    targetWidth,
+    targetHeight,
+    scale,
+    framesMax,
+    offset,
+  }) {
     this.name = name;
     this.position = position;
     this.width = width;
@@ -128,28 +153,29 @@ class Player {
     this.targetHeight = targetHeight;
     this.scale = scale;
     this.framesMax = framesMax;
-    this.framesCurrent = 0
+    this.framesCurrent = 0;
     this.framesElapsed = 0;
     this.framesHold = 10;
     this.offset = offset;
   }
+
   draw() {
     this.image.src = this.imageSrc;
     ctx.drawImage(
       this.image,
-      this.framesCurrent * (this.image.width / this.framesMax), 
-      0, 
-      this.image.width / this.framesMax, 
-      this.image.height, 
+      this.framesCurrent * (this.image.width / this.framesMax),
+      0,
+      this.image.width / this.framesMax,
+      this.image.height,
       this.position.x - this.offset.x,
       this.position.y - this.offset.y,
-      (this.image.width / this.framesMax)  * this.scale,
+      (this.image.width / this.framesMax) * this.scale,
       this.image.height * this.scale
-    )
+    );
   }
 
   animateframes() {
-    this.framesElapsed++ 
+    this.framesElapsed++;
     if (this.framesElapsed % this.framesHold === 0) {
       if (this.framesCurrent < this.framesMax - 1) {
         this.framesCurrent++;
@@ -160,21 +186,21 @@ class Player {
   }
 
   update() {
-    this.draw()
-    this.animateframes()
+    this.draw();
+    this.animateframes();
   }
-  
+
   // COMPLETED function to move player in 4 directions
   // COMPLETED function movePlayer has to be turned on and off in animate funciton
   playerActions = (player) => {
     if (this.health <= 0) {
       player.imageSrc = player.sprites.dead.imageSrc;
       player.framesMax = player.sprites.dead.framesMax;
-      return
+      return;
     }
     player.imageSrc = player.sprites.idle.imageSrc;
     player.framesMax = player.sprites.idle.framesMax;
-    
+
     if (this.keyUp.pressed) {
       this.position.y -= this.speed;
       player.imageSrc = player.sprites.run.imageSrc;
@@ -203,13 +229,12 @@ class Player {
             y: this.position.y + this.height / 2,
           },
           color: this.color,
-          speed: 100,
+          speed: 20,
           radius: 3,
         })
       );
     }
   };
-  
 
   bulletCollision = (bullets) => {
     bullets.forEach((bullet) => {
@@ -218,21 +243,16 @@ class Player {
         return;
       } else if (this.isCollision(bullet)) {
         this.health -= 10;
-        // this.displayedHealth -= 10;
-        console.log(this.health)
       }
     });
-  }
+  };
 
   reduceDisplayedHealth = () => {
     if (this.displayHealth !== this.health) {
-      this.health = parseInt(this.health)
-      // this.displayedHealth = this.health
+      this.health = parseInt(this.health);
       this.displayedHealth.innerText = `${this.name}: ${this.health}`;
     }
-
-    
-  }
+  };
 
   wallCollision = () => {
     if (this.position.x < 0) {
@@ -247,27 +267,41 @@ class Player {
     if (this.position.y > height - this.height) {
       this.position.y = height - this.height;
     }
-  }
+  };
 }
 
 class Picture extends Player {
-  constructor({ position, width, height, imageSrc, targetWidth, targetHeight }) {
-    super({ position, width, height, imageSrc, targetWidth, targetHeight })
+  constructor({
+    position,
+    width,
+    height,
+    imageSrc,
+    targetWidth,
+    targetHeight,
+  }) {
+    super({ position, width, height, imageSrc, targetWidth, targetHeight });
   }
   draw() {
     this.image;
     this.image.src = this.imageSrc;
     this.image.onload = () => {
-      ctx.drawImage(this.image, this.position.x, this.position.y, width, height)
-    }
+      ctx.drawImage(
+        this.image,
+        this.position.x,
+        this.position.y,
+        width,
+        height
+      );
+    };
   }
 }
-const background = new Picture({ 
+
+const background = new Picture({
   position: { x: 0, y: 0 },
   width: width,
   height: height,
   imageSrc: "./images/Grass_04-512x512.png",
-})
+});
 
 // ! Projectile class
 class Projectile extends Player {
@@ -281,19 +315,6 @@ class Projectile extends Player {
     ctx.fillStyle = this.color;
     ctx.arc(this.position.x, this.position.y, this.radius, 0, 2 * Math.PI);
     ctx.fill();
-  }
-}
-
-// ! Obsacle class
-class Obstacle extends Player {
-  constructor({ position, width, height, imageSrc }) {
-    super({ position, width, height, imageSrc });
-  }
-
-  drawObstacle() {
-    this.image;
-    this.image.src = this.imageSrc;
-    ctx.drawImage(this.image, this.position.x, this.position.y, this.width, this.height);
   }
 }
 
@@ -318,17 +339,19 @@ const player1 = new Player({
   keyShoot: { pressed: false },
   bullets: [],
   isCollision: (bullet) => {
-    return bullet.position.x < player1.position.x + player1.width &&
-    bullet.position.y > player1.position.y &&
-    bullet.position.y < player1.position.y + player1.height &&
-    bullet.position.x > player1.position.x
-  },  
+    return (
+      bullet.position.x < player1.position.x + player1.width &&
+      bullet.position.y > player1.position.y &&
+      bullet.position.y < player1.position.y + player1.height &&
+      bullet.position.x > player1.position.x
+    );
+  },
   sprites: {
-    idle: { 
-      imageSrc: "./images/Yellow/Gunner_Yellow_Idle.png", 
+    idle: {
+      imageSrc: "./images/Yellow/Gunner_Yellow_Idle.png",
       framesMax: 5,
     },
-    run: { 
+    run: {
       imageSrc: "./images/Yellow/Gunner_Yellow_Run.png",
       framesMax: 6,
     },
@@ -336,7 +359,7 @@ const player1 = new Player({
       imageSrc: "./images/Yellow/Gunner_Yellow_Run_Left.png",
       framesMax: 6,
     },
-    dead: { 
+    dead: {
       imageSrc: "./images/Yellow/Gunner_Yellow_Death.png",
       framesMax: 8,
     },
@@ -363,79 +386,43 @@ const player2 = new Player({
   keyShoot: { pressed: false },
   bullets: [],
   isCollision: (bullet) => {
-    return bullet.position.x > player2.position.x &&
-    bullet.position.x < player2.position.x + player2.width &&
-    bullet.position.y > player2.position.y &&
-    bullet.position.y < player2.position.y + player2.height
+    return (
+      bullet.position.x > player2.position.x &&
+      bullet.position.x < player2.position.x + player2.width &&
+      bullet.position.y > player2.position.y &&
+      bullet.position.y < player2.position.y + player2.height
+    );
   },
   sprites: {
-    idle: { 
-      imageSrc: "./images/Red/Gunner_Red_Idle.png", 
+    idle: {
+      imageSrc: "./images/Red/Gunner_Red_Idle.png",
       framesMax: 5,
     },
-    run: { 
+    run: {
       imageSrc: "./images/Red/Gunner_Red_Run.png",
       framesMax: 6,
     },
-    runOther: { 
+    runOther: {
       imageSrc: "./images/Red/Gunner_Red_Run_Right.png",
       framesMax: 6,
     },
-    dead: { 
+    dead: {
       imageSrc: "./images/Red/Gunner_Red_Death.png",
       framesMax: 8,
     },
   },
 });
 
-// const obstacle1 = new Obstacle({
-//   position: { x: 200, y: 100 },
-//   height: 200,
-//   width: 10,
-//   imageSrc: "./images/Bricks_09-128x128.png",
-// })  
-// const obstacle2 = new Obstacle({
-//   position: { x: 350, y: 300 },
-//   height: 150,
-//   width: 10,
-//   imageSrc: "./images/Bricks_09-128x128.png",
-// })
-// const obstacle3 = new Obstacle({
-//   position: { x: 300, y: 500 },
-//   height: 10,
-//   width: 100,
-//   imageSrc: "./images/Bricks_10-128x128.png",
-// })
-// const obstacle4 = new Obstacle({
-//   position: { x: 600, y: 150 },
-//   height: 10,
-//   width: 100,
-//   imageSrc: "./images/Bricks_10-128x128.png",
-// })
-// const obstacle5 = new Obstacle({
-//   position: { x: 600, y: 250 },
-//   height: 150,
-//   width: 10,
-//   imageSrc: "./images/Bricks_09-128x128.png",
-// })  
-// const obstacle6 = new Obstacle({
-//   position: { x: 800, y: 80 },
-//   height: 150,
-//   width: 10,
-//   imageSrc: "./images/Bricks_09-128x128.png",
-// })
-// const obstacles = [obstacle1, obstacle2, obstacle3, obstacle4, obstacle5, obstacle6];
-
 // ! Players collion with objects
 // const playerObjectsCollision = (player) => {
 //   obstacles.forEach((obstacle) => {
-//     if (player.position.x + player.width === obstacle.position.x && 
-//       player.position.y + player.height > obstacle.position.y && 
+//     if (player.position.x + player.width === obstacle.position.x &&
+//       player.position.y + player.height > obstacle.position.y &&
 //       player.position.y < obstacle.position.y + obstacle.height) {
 //       player.position.x -= 10;
-//     }      
-//     if (player.position.x === obstacle.position.x + obstacle.width  && 
-//       player.position.y + player.height > obstacle.position.y && 
+//     }
+//     if (player.position.x === obstacle.position.x + obstacle.width  &&
+//       player.position.y + player.height > obstacle.position.y &&
 //       player.position.y < obstacle.position.y + obstacle.height){
 //       player.position.x += 10;
 //     }
@@ -450,46 +437,56 @@ const player2 = new Player({
 //       player.position.y += 10;
 //     }
 //   })
-//   // const playerObjectsCollision = (player) => {
-//   //   obstacles.forEach((obstacle) => {
-//   //     if (player.position.x + player.width === obstacle.position.x && 
-//   //       player.position.y + player.height > obstacle.position.y && 
-//   //       player.position.y < obstacle.position.y + obstacle.height) {
-//   //       player.position.x -= 10;
-//   //     }      
-//   //     if (player.position.x === obstacle.position.x + obstacle.width  && 
-//   //       player.position.y + player.height > obstacle.position.y && 
-//   //       player.position.y < obstacle.position.y + obstacle.height){
-//   //       player.position.x += 10;
-//   //     }
-//   //     if (player.position.x + player.width > obstacle.position.x &&
-//   //       player.position.x < obstacle.position.x + obstacle.width &&
-//   //       player.position.y + player.height === obstacle.position.y - 90) {
-//   //       player.position.y -= 10;
-//   //     }
-//   //     if (player.position.x + player.width > obstacle.position.x &&
-//   //       player.position.x < obstacle.position.x + obstacle.width &&
-//   //       player.position.y === obstacle.position.y + obstacle.height) {
-//   //       player.position.y += 10;
-//   //     }
-//   //   })
-// }
+// const playerObjectsCollision = (player) => {
+//   obstacles.forEach((obstacle) => {
+//     if (
+//       player.position.x + player.width === obstacle.position.x &&
+//       player.position.y + player.height > obstacle.position.y &&
+//       player.position.y < obstacle.position.y + obstacle.height
+//     ) {
+//       player.position.x -= 10;
+//     }
+//     if (
+//       player.position.x === obstacle.position.x + obstacle.width &&
+//       player.position.y + player.height > obstacle.position.y &&
+//       player.position.y < obstacle.position.y + obstacle.height
+//     ) {
+//       player.position.x += 10;
+//     }
+//     if (
+//       player.position.x + player.width > obstacle.position.x &&
+//       player.position.x < obstacle.position.x + obstacle.width &&
+//       player.position.y + player.height === obstacle.position.y - 90
+//     ) {
+//       player.position.y -= 10;
+//     }
+//     if (
+//       player.position.x + player.width > obstacle.position.x &&
+//       player.position.x < obstacle.position.x + obstacle.width &&
+//       player.position.y === obstacle.position.y + obstacle.height
+//     ) {
+//       player.position.y += 10;
+//     }
+//   });
+// };
 // const bulletObjectCollision = (player) => {
 //   player.bullets.forEach((bullet) => {
 //     obstacles.forEach((obstacle) => {
-//       if (bullet.position.x > obstacle.position.x && 
+//       if (
+//         bullet.position.x > obstacle.position.x &&
 //         bullet.position.y > obstacle.position.y &&
-//         bullet.position.y < obstacle.position.y + obstacle.height && 
-//         bullet.position.x < obstacle.position.x + obstacle.width) {
+//         bullet.position.y < obstacle.position.y + obstacle.height &&
+//         bullet.position.x < obstacle.position.x + obstacle.width
+//       ) {
 //         player.bullets.splice(player.bullets.indexOf(bullet), 1);
 //       }
-//     })
-//   })
-// }
+//     });
+//   });
+// };
 
 const animate = () => {
   window.requestAnimationFrame(animate);
-  background.draw()
+  background.draw();
   player1.update();
   player2.update();
   player1.playerActions(player1);
@@ -498,20 +495,15 @@ const animate = () => {
   player2.wallCollision();
   player1.reduceDisplayedHealth(player1);
   player2.reduceDisplayedHealth(player2);
-
-  // obstacle1.drawObstacle();
-  // obstacle2.drawObstacle();
-  // obstacle3.drawObstacle();
-  // obstacle4.drawObstacle();
-  // obstacle5.drawObstacle();
-  // obstacle6.drawObstacle();
-  // playerObjectsCollision(player1, player2);
-  // playerObjectsCollision(player2, player1); 
+  // playerObjectsCollision(player2, player1);
   // bulletObjectCollision(player1);
   // bulletObjectCollision(player2);
-  
+
   player1.bullets.forEach((bullet) => {
-    if (bullet.position.x - bullet.radius > canvas.width || player2.isCollision(bullet)) {
+    if (
+      bullet.position.x - bullet.radius > canvas.width ||
+      player2.isCollision(bullet)
+    ) {
       player1.bullets.splice(player1.bullets.indexOf(bullet), 1);
     } else {
       bullet.draw();
@@ -519,7 +511,7 @@ const animate = () => {
     }
     player2.bulletCollision(player1.bullets);
   });
-  
+
   player2.bullets.forEach((bullet) => {
     if (bullet.position.x <= 0 || player1.isCollision(bullet)) {
       player2.bullets.splice(player2.bullets.indexOf(bullet), 1);
@@ -528,7 +520,6 @@ const animate = () => {
       bullet.position.x -= bullet.speed;
     }
     player1.bulletCollision(player2.bullets);
-  })
-
-}
+  });
+};
 animate();
